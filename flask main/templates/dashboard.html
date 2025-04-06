@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Elderly Care Multi-Agent Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 p-6 font-sans">
+    <h1 class="text-3xl font-bold mb-6 text-center text-indigo-700">Elderly Care Multi-Agent Dashboard</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Left Column -->
+        <div class="flex flex-col gap-6">
+            <!-- Health Monitoring Section -->
+            <div class="bg-white shadow-md p-4 rounded min-h-[600px]">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Health Monitoring Report</h2>
+                <div class="mb-4 flex items-center justify-center">
+                    <canvas id="healthDonutChart" width="250" height="250"></canvas>
+                </div>
+                <div class="overflow-y-auto max-h-[300px]">
+                    {% for entry in health.entries %}
+                    <div class="bg-gray-50 p-4 mb-4 rounded shadow-sm">
+                        <p><strong>User ID:</strong> {{ entry.user_id }}</p>
+                        <p><strong>Timestamp:</strong> {{ entry.timestamp }}</p>
+                        <p><strong>Heart Rate:</strong> {{ entry.heart_rate }}</p>
+                        <p><strong>SpO₂:</strong> {{ entry.spo2 }}</p>
+                        <p><strong>Glucose:</strong> {{ entry.glucose }}</p>
+
+                        {% if entry.abnormalities %}
+                        <div class="mt-2">
+                            <strong class="text-red-600">Abnormalities:</strong>
+                            <ul class="list-disc list-inside ml-4 text-red-600">
+                                {% for abnormality in entry.abnormalities %}
+                                <li>{{ abnormality }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        {% if entry.llm_suggestion %}
+                        <div class="mt-4">
+                            <strong>LLM Suggestion:</strong>
+                            <div class="bg-white border border-gray-300 p-3 mt-1 rounded overflow-y-auto max-h-60 whitespace-pre-wrap text-sm text-gray-800">
+                                {{ entry.llm_suggestion }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Safety Monitoring Section -->
+            <div class="bg-white shadow-md p-4 rounded min-h-[600px]">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Safety Monitoring Report</h2>
+                <div class="overflow-y-auto max-h-[600px]">
+                    {% if safety.entries %}
+                        {% for entry in safety.entries %}
+                        <div class="bg-gray-50 p-4 mb-4 rounded shadow-sm">
+                            <p><strong>User ID:</strong> {{ entry.user_id }}</p>
+                            <p><strong>Timestamp:</strong> {{ entry.timestamp }}</p>
+                            <p><strong>Event Type:</strong> {{ entry.event_type }}</p>
+
+                            {% if entry.critical_event == 'Yes' %}
+                            <p class="text-red-600 font-semibold">⚠ Critical Event</p>
+                            {% endif %}
+
+                            {% if entry.caregiver_notified == 'Yes' %}
+                            <p class="text-yellow-600 font-semibold">📢 Caregiver Notified</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="bg-green-50 text-green-700 font-semibold p-4 rounded shadow-sm text-center">
+                            ✅ No safety incidents reported. All is safe!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="flex flex-col gap-6">
+            
+            <!-- Daily Routine Section -->
+            <div class="bg-white shadow-md p-4 rounded min-h-[600px]">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Daily Routine & Reminder Report</h2>
+
+                {% for entry in routine.entries %}
+                <div class="bg-gray-50 p-4 mb-4 rounded shadow-sm">
+                    <p><strong>User ID:</strong> {{ entry.user_id }}</p>
+                    <p><strong>Reminder Type:</strong> {{ entry.reminder_type }}</p>
+                    <p><strong>Scheduled Time:</strong> {{ entry.scheduled_time }}</p>
+                    <p><strong>Timestamp:</strong> {{ entry.timestamp }}</p>
+
+                    {% if entry.issues %}
+                    <div class="mt-2">
+                        <strong class="text-red-600">Issues:</strong>
+                        <ul class="list-disc list-inside ml-4 text-red-600">
+                            {% for issue in entry.issues %}
+                            <li>{{ issue }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if entry.llm_suggestion %}
+                    <div class="mt-4">
+                        <strong>LLM Suggestion:</strong>
+                        <div class="bg-white border border-gray-300 p-3 mt-1 rounded overflow-y-auto max-h-60 whitespace-pre-wrap text-sm text-gray-800">
+                            {{ entry.llm_suggestion }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Social Engagement -->
+            <div class="bg-white shadow-md p-4 rounded min-h-[600px]">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Social Engagement</h2>
+                <div class="overflow-y-auto max-h-[600px]">
+                    {% if social.entries %}
+                        {% set has_issues = false %}
+                        {% for entry in social.entries %}
+                            {% if entry.issues_detected %}
+                                {% set has_issues = true %}
+                                <div class="bg-gray-50 p-4 mb-4 rounded shadow-sm">
+                                    <p><strong>User ID:</strong> {{ entry.user_id }}</p>
+                                    <p><strong>Timestamp:</strong> {{ entry.timestamp }}</p>
+
+                                    <div class="mt-2">
+                                        <strong class="text-red-600">Issues Detected:</strong>
+                                        <ul class="list-disc list-inside ml-4 text-red-600">
+                                            {% for issue in entry.issues_detected %}
+                                            <li>{{ issue.Health_Monitoring }}</li>
+                                            <li>{{ issue.Safety_Monitoring }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+
+                                    {% if entry.llm_suggestion %}
+                                    <div class="mt-4">
+                                        <strong>LLM Suggestion:</strong>
+                                        <div class="bg-white border border-gray-300 p-3 mt-1 rounded overflow-y-auto max-h-60 whitespace-pre-wrap text-sm text-gray-800">
+                                            {{ entry.llm_suggestion }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        {% if not has_issues %}
+                        <div class="bg-green-50 text-green-700 font-semibold p-4 rounded shadow-sm text-center">
+                            ✅ No signs of social disengagement. Everything looks good!
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="bg-green-50 text-green-700 font-semibold p-4 rounded shadow-sm text-center">
+                            ✅ No social activity data available yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const health = {{ health | tojson | safe }};
+            const latest = health.entries && health.entries.length > 0
+                ? health.entries[health.entries.length - 1]
+                : {};
+
+            const donutLabels = ['Heart Rate', 'SpO₂', 'Glucose'];
+            const donutData = [
+                latest.heart_rate || 0,
+                latest.spo2 || 0,
+                latest.glucose || 0
+            ];
+
+            const ctx = document.getElementById('healthDonutChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: donutLabels,
+                        datasets: [{
+                            label: 'Health Metrics',
+                            data: donutData,
+                            backgroundColor: ['#3B82F6', '#10B981', '#F59E0B'],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'SpO₂, Heart Rate & Glucose Levels'
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    {% include "chatbot.html" %}
+</body>
+</html>

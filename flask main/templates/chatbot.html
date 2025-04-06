@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elderly Care Report Dashboard with Chatbot</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+  <!-- Chatbot Floating Widget -->
+  <div id="chatbot-container" class="fixed bottom-6 right-6 w-80 z-50">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-300">
+      <div class="bg-indigo-600 text-white px-4 py-2 font-semibold">Ask the AI Assistant</div>
+      <div id="chat-messages" class="p-3 h-64 overflow-y-auto text-sm bg-gray-50"></div>
+      <div class="flex border-t border-gray-200">
+        <input type="text" id="chat-input" placeholder="Ask about any report..." 
+          class="w-full px-3 py-2 focus:outline-none text-sm" />
+        <button onclick="sendChat()" class="bg-indigo-600 text-white px-4">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Fetch report data from backend (optional if you're embedding statically)
+    fetch("/report/health").then(res => res.json()).then(data => {
+      document.getElementById("health-report").textContent = JSON.stringify(data, null, 2);
+    });
+    fetch("/report/routine").then(res => res.json()).then(data => {
+      document.getElementById("routine-report").textContent = JSON.stringify(data, null, 2);
+    });
+    fetch("/report/safety").then(res => res.json()).then(data => {
+      document.getElementById("safety-report").textContent = JSON.stringify(data, null, 2);
+    });
+    fetch("/report/social").then(res => res.json()).then(data => {
+      document.getElementById("social-report").textContent = JSON.stringify(data, null, 2);
+    });
+
+    // Chatbot send function
+    async function sendChat() {
+      const input = document.getElementById("chat-input");
+      const message = input.value.trim();
+      if (!message) return;
+
+      const chatBox = document.getElementById("chat-messages");
+      chatBox.innerHTML += `<div class="mb-2"><strong>You:</strong> ${message}</div>`;
+      input.value = "";
+
+      const res = await fetch("/chatbot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message })
+      });
+
+      const data = await res.json();
+      chatBox.innerHTML += `<div class="mb-2 text-gray-800"><strong>AI:</strong> ${data.response}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>

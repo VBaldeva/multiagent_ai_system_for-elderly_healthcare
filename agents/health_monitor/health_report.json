@@ -1,0 +1,18 @@
+{
+    "entries":[{
+        
+    "timestamp": "2025-04-05 23:33:24",
+    "user_id": "D10998",
+    "heart_rate": 101,
+    "spo2" : 91,
+    "systolic_bp": 125,
+    "diastolic_bp": 80,
+    "glucose": 110,
+    "abnormalities": [
+        "Heart Rate is abnormal: 101",
+        "Oxygen Saturation (SpO\u2082%) is abnormal: 91"
+    ],
+    "llm_suggestion": " The abnormalities detected in the vital signs suggest tachycardia (elevated heart rate at 101 bpm) and low oxygen saturation (SpO2% at 91). These findings may indicate respiratory distress or an underlying cardiac condition.\n\nGiven that alerts have already been triggered and the caregiver has been notified, it is essential to monitor the patient closely. Here are some actions to be taken:\n\n1. Ensure the patient's airway is clear and provide supplemental oxygen if necessary.\n2. Administer any prescribed medications for cardiac or respiratory support as needed, under medical supervision.\n3. Continuously monitor heart rate, blood pressure, and SpO2 levels to assess trends and changes over time.\n4. If the patient's condition does not improve or worsens, contact a healthcare professional immediately for further guidance and potential hospitalization.\n5. Document all observations, interventions, and the patient's response in the caregiver's records for future reference."
+    }]
+
+}
